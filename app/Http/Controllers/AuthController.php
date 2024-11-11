@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
+use Laravel\Sanctum\Sanctum;
 
 
 
@@ -62,8 +63,10 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
-            //$token = $user->createToken('AuthToken')->accessToken;
-            return response()->json(['user' => $user]);
+            $token = $user->createToken('AuthToken')->plainTextToken;
+            return response()->json(['user' => $user,
+            'token' => $token
+        ]);
         } else {
             return response()->json(['error' => 'Unauthorized'], 401);
         }

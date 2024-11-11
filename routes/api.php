@@ -5,7 +5,7 @@ use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\ResetPasswordController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\HouseController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -21,10 +21,21 @@ Route::group([
 ], function () {
     // Define your API routes here
     Route::post('register', [AuthController::class, 'register']);
-    Route::post('login', [AuthController::class, 'login']);
+    Route::post('login', [AuthController::class, 'login'])->name('login');
+
     
 
 });
+
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/houses', [HouseController::class, 'store']); // Add a house
+    Route::post('/houses/{house}/images', [HouseController::class, 'addImage']); // Add an image to a house
+    Route::delete('/houses/{house}', [HouseController::class, 'destroy']); // Delete a house and its images
+    Route::delete('/houses/{house}/images/{image}', [HouseController::class, 'deleteImage']); // Delete a specific image from a house
+});
+
+
 
 
 Route::middleware('auth:sanctum')->
