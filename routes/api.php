@@ -29,10 +29,10 @@ Route::group([
 
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/houses', [HouseController::class, 'store']); // Add a house
-    Route::post('/houses/{house}/images', [HouseController::class, 'addImage']); // Add an image to a house
-    Route::delete('/houses/{house}', [HouseController::class, 'destroy']); // Delete a house and its images
-    Route::delete('/houses/{house}/images/{image}', [HouseController::class, 'deleteImage']); // Delete a specific image from a house
+    Route::post('/houses', [HouseController::class, 'store']); 
+    Route::post('/houses/{house}/images', [HouseController::class, 'addImage']);
+    Route::delete('/houses/{house}', [HouseController::class, 'destroy']); 
+    Route::delete('/houses/{house}/images/{image}', [HouseController::class, 'deleteImage']); 
 });
 
 
