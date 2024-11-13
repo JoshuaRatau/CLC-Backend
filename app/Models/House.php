@@ -10,15 +10,12 @@ class House extends Model
 {
     use HasFactory;
 
-    // Add both 'image_path' and 'image' to the fillable array
     protected $fillable = [
         'user_id',
         'address',
         'description',
         'latitude',
-        'longitude',
-        'image_path', // Path to the stored image file
-        'image'       // Binary data for the image
+        'longitude'
     ];
 
     // Relationship with the User model

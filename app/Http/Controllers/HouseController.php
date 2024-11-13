@@ -21,29 +21,11 @@ class HouseController extends Controller
                 'description' => 'nullable|string',
                 'latitude' => 'required|numeric',
                 'longitude' => 'required|numeric',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Validate image file
             ]);
             Log::info('Validation passed');
         } catch (\Exception $e) {
             Log::error('Validation failed: ' . $e->getMessage());
             return response()->json(['error' => 'Validation failed'], 422);
-        }
-    
-        $imagePath = null;
-    
-        // Check if an image file was uploaded
-        if ($request->hasFile('image')) {
-            Log::info('Image file detected');
-            $file = $request->file('image');
-    
-            if ($file->isValid()) {
-                $imagePath = $file->store('houses', 'public');
-                Log::info('Image stored successfully at path: ' . $imagePath);
-            } else {
-                Log::error('Uploaded image file is invalid.');
-            }
-        } else {
-            Log::info('No image file uploaded in the request.');
         }
     
         try {
@@ -53,7 +35,6 @@ class HouseController extends Controller
             Log::info('Description: ' . $request->description);
             Log::info('Latitude: ' . $request->latitude);
             Log::info('Longitude: ' . $request->longitude);
-            Log::info('Image Path: ' . $imagePath);
     
             // Create a new house record in the database
             $house = House::create([
@@ -62,24 +43,29 @@ class HouseController extends Controller
                 'description' => $request->description,
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude,
-                'image_path' => $imagePath,
             ]);
     
             Log::info('House created successfully with ID: ' . $house->id);
     
             return response()->json(['house' => $house, 'message' => 'House added successfully'], 201);
     
-        }catch (\Exception $e) {
-    Log::error('Failed to create house record: ' . $e->getMessage());
-    Log::error('Exception Trace: ' . $e->getTraceAsString());  // Add trace log for debugging
-    return response()->json(['error' => 'Failed to create house record. Please try again.'], 500);
-}
-
+        } catch (\Exception $e) {
+            Log::error('Failed to create house record: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to create house record. Please try again.'], 500);
+        }
     }
     
-    
-    
-    
+
+    public function getUserHouses()
+    {
+        $userHouses = House::where('user_id', Auth::id())->get();
+
+        if ($userHouses->isEmpty()) {
+            return response()->json(['message' => 'No houses found for this user'], 404);
+        }
+
+        return response()->json(['houses' => $userHouses], 200);
+    }
 
 
     

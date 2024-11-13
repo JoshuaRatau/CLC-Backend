@@ -29,6 +29,7 @@ Route::group([
 
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user/houses', [HouseController::class, 'getUserHouses']);
     Route::post('/houses', [HouseController::class, 'store']); 
     Route::post('/houses/{house}/images', [HouseController::class, 'addImage']);
     Route::delete('/houses/{house}', [HouseController::class, 'destroy']); 
