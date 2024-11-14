@@ -102,12 +102,47 @@ class HouseController extends Controller
         $houseImage = HouseImage::create([
             'house_id' => $houseId,
             'image_path' => $filePath,
+            'image_file' => $imageContent,  // Store the raw file data here
             'description' => $request->description,
         ]);
     
         return response()->json(['house_image' => $houseImage, 'message' => 'Image uploaded successfully.'], 201);
     }
     
+
+    public function getImages($houseId)
+    {
+        // Log the authenticated user's ID and the requested house ID
+        $userId = Auth::id();
+        \Log::info("Authenticated User ID: $userId");
+        \Log::info("Requested House ID: $houseId");
+    
+        // Ensure that the authenticated user owns the specified house
+        $house = House::where('id', $houseId)->where('user_id', $userId)->first();
+    
+        if (!$house) {
+            \Log::error('Unauthorized access or house not found for this user.');
+            return response()->json(['error' => 'Unauthorized or House not found.'], 403);
+        }
+    
+        // Retrieve all images associated with the specified house
+        $images = HouseImage::where('house_id', $houseId)->get(['image_path', 'description']);
+    
+        // Check if images are found
+        if ($images->isEmpty()) {
+            return response()->json(['message' => 'No images found for this house.'], 404);
+        }
+    
+        // Map the image URLs for easy access on the frontend
+        $images = $images->map(function($image) {
+            $image->image_url = asset('storage/' . $image->image_path);
+            return $image;
+        });
+    
+        return response()->json(['images' => $images], 200);
+    }
+
+
     
 
     public function destroy(House $house)
