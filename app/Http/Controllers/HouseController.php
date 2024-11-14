@@ -102,7 +102,6 @@ class HouseController extends Controller
         $houseImage = HouseImage::create([
             'house_id' => $houseId,
             'image_path' => $filePath,
-            'image_file' => $imageContent,  // Store the raw file data here
             'description' => $request->description,
         ]);
     
@@ -156,20 +155,34 @@ class HouseController extends Controller
         }
     }
 
-    public function deleteImage(House $house, HouseImage $image)
+    public function deleteImage($houseId, $imageId)
     {
-        // Check if the image belongs to the house
-        if ($image->house_id !== $house->id) {
-            return response()->json(['error' => 'Image does not belong to this house'], 403);
+        // Get the authenticated user's ID
+        $userId = Auth::id();
+
+        // Find the house and ensure it belongs to the authenticated user
+        $house = House::where('id', $houseId)->where('user_id', $userId)->first();
+
+        if (!$house) {
+            return response()->json(['error' => 'Unauthorized or House not found.'], 403);
+        }
+
+        // Find the image associated with the house
+        $image = HouseImage::where('id', $imageId)->where('house_id', $houseId)->first();
+
+        if (!$image) {
+            return response()->json(['error' => 'Image not found for this house.'], 404);
         }
 
         // Delete the image file from storage
-        Storage::disk('public')->delete($image->image_path);
+        if ($image->image_path && \Storage::disk('public')->exists($image->image_path)) {
+            \Storage::disk('public')->delete($image->image_path);
+        }
 
-        // Delete the record from the database
+        // Delete the image record from the database
         $image->delete();
 
-        return response()->json(['message' => 'Image deleted successfully']);
+        return response()->json(['message' => 'Image deleted successfully.'], 200);
     }
 }
 

@@ -35,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/houses/{house}', [HouseController::class, 'destroy']); 
     Route::delete('/houses/{house}/images/{image}', [HouseController::class, 'deleteImage']); 
     Route::get('/houses/{house}/images', [HouseController::class, 'getImages']);
+    Route::delete('/houses/{house}/images/{image}', [HouseController::class, 'deleteImage']);
 });
 
 
