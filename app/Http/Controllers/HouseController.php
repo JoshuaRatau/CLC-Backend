@@ -1,8 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\File;
 use App\Models\House;
+use App\Models\HouseImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -68,16 +69,56 @@ class HouseController extends Controller
     }
 
 
+    public function addImage(Request $request, $houseId)
+    {
+        // Log the authenticated user's ID and the requested house ID
+        $userId = Auth::id();
+        \Log::info("Authenticated User ID: $userId");
+        \Log::info("Requested House ID: $houseId");
     
+        // Ensure that the authenticated user owns the specified house
+        $house = House::where('id', $houseId)->where('user_id', $userId)->first();
     
+        if (!$house) {
+            \Log::error('Unauthorized access or house not found for this user.');
+            return response()->json(['error' => 'Unauthorized or House not found.'], 403);
+        }
     
+        // Check if the image file exists in the request
+        if (!$request->hasFile('image')) {
+            return response()->json(['error' => 'Image file missing.'], 400);
+        }
+    
+        // Validate the image and description fields
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'description' => 'nullable|string',
+        ]);
+    
+        // Store the uploaded image file in the 'house_images' directory
+        $filePath = $request->file('image')->store('house_images', 'public');
+    
+        // Create a new house image record
+        $houseImage = HouseImage::create([
+            'house_id' => $houseId,
+            'image_path' => $filePath,
+            'description' => $request->description,
+        ]);
+    
+        return response()->json(['house_image' => $houseImage, 'message' => 'Image uploaded successfully.'], 201);
+    }
     
     
 
     public function destroy(House $house)
     {
-        $house->delete(); // This will also delete all associated images due to cascade
-        return response()->json(['message' => 'House and all associated images deleted successfully']);
+        try {
+            $house->delete();  // This triggers the cascade delete on related images
+
+            return response()->json(['message' => 'House and all associated images deleted successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to delete the house'], 500);
+        }
     }
 
     public function deleteImage(House $house, HouseImage $image)

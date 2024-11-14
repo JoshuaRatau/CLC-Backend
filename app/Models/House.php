@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use App\Models\HouseImage;
 
 class House extends Model
 {
@@ -22,5 +23,11 @@ class House extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    // Relationship with the HouseImage model
+    public function images()
+    {
+        return $this->hasMany(HouseImage::class);
     }
 }
