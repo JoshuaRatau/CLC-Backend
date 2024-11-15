@@ -70,7 +70,7 @@ Run Database Migrations:
 php artisan serve
 
 
-## The API should noe be running at http://127.0.0.1:8000.
+## The API should now be running at http://127.0.0.1:8000.
 
 
 
